@@ -1,9 +1,18 @@
+//-----------
+// EXPRESS Router and app
+// ----------
 const express = require("express");
+const router = express.Router();
+//const app = express();
+//-----------
+// DataHandler instance -- File operations.
+// ----------
 const DataHandler = require("../libs/data_ops");
-let router = express.Router();
-
 const noteHandler = new DataHandler();
 
+//-------
+// ROUTING
+//-------
 router
   .route("/notes")
   .get((req, res) => {
@@ -23,9 +32,13 @@ router
     //calling WriteDataToFile function from DataHandler
     //receives callback to handle data returned
     try {
-      noteHandler.WriteDataToFile((err, data) => {
+      noteHandler.PrepDataToWrite(req.body, (err, data) => {
         if (err) throw err; ////error received from DataHandler method
-        res.send(data);
+        //sending data to WriteToFile function in DataHandler
+        noteHandler.WriteToFile(data, (err, lastElem) => {
+            if (err) throw err; ////error received from DataHandler method
+            res.send(lastElem); //sending last element added to update FE.
+        })
       });
     } catch (error) {
       console.error(error);

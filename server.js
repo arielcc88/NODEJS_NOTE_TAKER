@@ -7,6 +7,9 @@ const express = require("express");
 const PORT = process.env.PORT || 8080;
 //express instance: app
 const app = express();
+// Parse request body as JSON
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 /**
  * --------------------------
