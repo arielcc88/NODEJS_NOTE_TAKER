@@ -21,11 +21,11 @@ router
     try {
       noteHandler.ReadDataFromFile((err, data) => {
         if (err) throw err; ////error received from DataHandler method
-        res.send(data);
+        res.status(200).send(data);
       });
     } catch (error) {
       console.error(error);
-      res.send({ message: "ERROR Reading Data from File." });
+      res.status(500).send({ message: "ERROR Reading Data from File." });
     }
   })
   .post((req, res) => {
@@ -36,19 +36,31 @@ router
         if (err) throw err; ////error received from DataHandler method
         //sending data to WriteToFile function in DataHandler
         noteHandler.WriteToFile(data, (err, lastElem) => {
-            if (err) throw err; ////error received from DataHandler method
-            res.send(lastElem); //sending last element added to update FE.
-        })
+          if (err) throw err; ////error received from DataHandler method
+          res.status(200).send(lastElem[lastElem.length - 1]); //sending last element added to update FE.
+        });
       });
     } catch (error) {
       console.error(error);
-      res.send({ message: "ERROR Reading Data from File." });
+      res.status(500).send({ message: "ERROR Reading Data from File." });
     }
   });
 
 //note ID - DELETE
 router.route("/notes/:id").delete((req, res) => {
-  res.send(`note with id ${req.params.id} has been deleted.`);
+  try {
+    noteHandler.DeleteFromFile(req.params.id, (err, modData) => {
+      if (err) throw err;
+      //sending data to WriteToFile function in DataHandler
+      noteHandler.WriteToFile(modData, (err, allElem) => {
+        if (err) throw err; ////error received from DataHandler method
+        res.status(200).send(allElem); //success
+      });
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: `ERROR Deleting Note ID ${req.params.id}.` });
+  }
 });
 
 module.exports = router;

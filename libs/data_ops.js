@@ -45,7 +45,6 @@ class DataHandler {
         fs.readFile(this.file_path, (err, data) => {
           if (err) throw err; //error to be handled in catch block and returned to cb
           ////if no error, cb receives null for error and data (if any)
-          console.log("data empty", data.length);
           return data.length ? cb(null, JSON.parse(data)) : cb(null, []); // return empty array if no data
         });
       } catch (error) {
@@ -74,13 +73,11 @@ class DataHandler {
     try {
       //read file to determine total number of notes existing
       this.ReadDataFromFile((err, dataRead) => {
-        console.log("data read empty", dataRead);
         if (err) throw err;
         //the number of elements in JSON data + 1 = new Note's id.
         dataWrite["id"] = dataRead.length + 1;
         //pushing new element to array
         dataRead.push(dataWrite);
-        console.log("data read !empty", dataRead);
         //returning data to callback
         return cb(null, dataRead); //this callback will call the WriteToFile function
       });
@@ -98,7 +95,34 @@ class DataHandler {
       fs.writeFile(this.file_path, JSON.stringify(newData), (err) => {
         if (err) throw err;
         //if writing passes
-        return cb(null, newData[newData.length - 1]);
+        return cb(null, newData);
+      });
+    } catch (error) {
+      console.error("ERROR", error);
+      //return error, null for results.
+      return cb(new Error(`ERROR: ${error}`), null);
+    }
+  }
+
+  //delete from file method
+  //async execution
+  DeleteFromFile(elemID, cb) {
+    //returns modified array ready to be written
+    try {
+      //read file to determine total number of notes existing
+      this.ReadDataFromFile((err, dataRead) => {
+        if (err) throw err;
+        //checking if data returned and elemID > 0
+        if (dataRead.length > 0 && elemID > 0) {
+            //finding and removing item with ID = elemID
+            dataRead.forEach((element,index) => {
+                if (element.id === parseInt(elemID)) {
+                    dataRead.splice(index, 1);
+                }
+            });
+        }
+        //returning data to callback
+        return cb(null, dataRead); //returning modified array to routes
       });
     } catch (error) {
       console.error("ERROR", error);
