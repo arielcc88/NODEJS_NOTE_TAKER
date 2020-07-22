@@ -75,7 +75,8 @@ class DataHandler {
       this.ReadDataFromFile((err, dataRead) => {
         if (err) throw err;
         //the number of elements in JSON data + 1 = new Note's id.
-        dataWrite["id"] = dataRead.length + 1;
+        //dataWrite["id"] = (dataRead[dataRead.length - 1].id + 1);
+        dataWrite["id"] = dataRead.length > 0 ? Math.max.apply(Math, dataRead.map(elem => {return elem.id})) + 1 : 1;
         //pushing new element to array
         dataRead.push(dataWrite);
         //returning data to callback
